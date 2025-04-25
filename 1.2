@@ -1,0 +1,47 @@
+package org.example;
+import java.sql.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // Get a connection from the HikariCPDataSource
+        try {
+            Connection conn = DriverManager.getConnection(
+                    "jdbc:postgresql://localhost:5432/postgres", "postgres", "postgres"
+            );
+            if (conn != null) {
+                System.out.println("Connection established");
+
+                // Do things once connection is established
+                // In this case, print the PostgreSQL version
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery("SELECT first_name, last_name, salary, commission_pct FROM employees");
+                while (rs.next()) {
+                    String firstName = rs.getString("first_name");
+                    String lastName = rs.getString("last_name");
+                    double salary = rs.getDouble("salary");
+                    Double commissionPct = rs.getDouble("commission_pct");
+
+                    // If commissionPct is null, set it to 0
+                    if (rs.wasNull()) {
+                        commissionPct = 0.0;
+                    }
+
+                    double commission = salary * commissionPct;
+                    double totalSalary = salary + commission;
+
+                    System.out.println(
+                            firstName + " " + lastName + " | " +
+                                    "Salary: " + salary + " | " +
+                                    "Commission %: " + commissionPct + " | " +
+                                    "Commission: " + commission + " | " +
+                                    "Total Salary: " + totalSalary
+                    );
+                }
+            } else {
+                System.out.println("Connection failed");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+}
